@@ -16,6 +16,15 @@ function getDeviceInfo(req) {
     }
 }
 
+function genericErrorHandler(res) {
+    return function (err) {
+        res.status(400).send({
+            error: 'Unknown error'
+        });
+        console.error(err.stack);
+    }
+}
+
 function validationErrorHandler(res) {
     return function (err) {
         var errors = {}; 
@@ -45,7 +54,7 @@ api.post('/register', function (req, res) {
     // step1: Create a new account object
     Account.register(req.body.username, req.body.password).then(function (account) {
         // step2: Authenticate right away in order to save a roundtrip to the server
-        return [account, account.auth(password, getDeviceInfo(req))];
+        return [account, account.auth(req.body.password, getDeviceInfo(req))];
     }).spread(function (account, auth) {
         // step3: Save the collection. Throws an exception if the data is invalid
         return [account.trySave(), auth];
@@ -56,11 +65,30 @@ api.post('/register', function (req, res) {
         });
     })
     .catch(MongoError.ValidationError, validationErrorHandler(res))
-    .catch(function (err) {
-        res.status(400).send({
-            error: 'Unknown error'
-        });
-        console.error(err.stack);
-    });
+    .catch(genericErrorHandler(res));
 });
 
+/**
+ * HTTP GET /login
+ * {
+ *      username: String,
+ *      password: String
+ * }
+ *
+ * Response: {
+ *      key: String
+ * }
+ */
+api.post('/login', function (req, res) {
+    Account.findOne({username: req.body.username}).then(function(account) {
+        return [account, account.auth(req.body.password, getDeviceInfo(req))];
+    }).spread(function (account, auth) {
+        return [account.trySave(), auth];
+    }).spread(function (account, auth) {
+        return res.send({
+            key: auth.key
+        });
+    })
+    .catch(MongoError.ValidationError, validationErrorHandler(res))
+    .catch(genericErrorHandler(res));
+});

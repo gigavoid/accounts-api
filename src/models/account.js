@@ -1,6 +1,7 @@
 var Promise     = require('bluebird'),
     mongoose    = require('mongoose'),
     config      = require('../configLoader'),
+    MongoError  = require('mongoose/lib/error'),
     bcrypt      = Promise.promisifyAll(require('bcrypt'));
 
 var accountSchema = mongoose.Schema({
@@ -25,7 +26,7 @@ var accountSchema = mongoose.Schema({
             ipAddress: { type: String }
         },
 
-        loginDate: { type: Date, defult: Date.now }
+        loginDate: { type: Date, default: Date.now }
     }]
 });
 
@@ -56,7 +57,11 @@ accountSchema.statics.register = function(username, password) {
 accountSchema.methods.auth = function(password, deviceInfo) {
     var self = this;
     return bcrypt.compareAsync(password, this.password).then(function(same) {
-        if (!same) return false;
+        if (!same) {
+            var error = new MongoError.ValidationError(self);
+            error.errors.password = new MongoError.ValidatorError('password', 'Invalid password', 'notvalid');
+            throw error;
+        }
 
         var device = {
             key: genAuthKey(),
