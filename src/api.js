@@ -69,7 +69,7 @@ api.post('/register', function (req, res) {
 });
 
 /**
- * HTTP GET /login
+ * HTTP POST /login
  * {
  *      username: String,
  *      password: String
@@ -87,6 +87,26 @@ api.post('/login', function (req, res) {
     }).spread(function (account, auth) {
         return res.send({
             key: auth.key
+        });
+    })
+    .catch(MongoError.ValidationError, validationErrorHandler(res))
+    .catch(genericErrorHandler(res));
+});
+
+/**
+ * HTTP POST /verify
+ * {
+ *      key: String
+ * }
+ *
+ * Response: {
+ *      username: String
+ * }
+ */
+api.post('/verify', function (req, res) {
+    Account.findOne({'devices.key': req.body.key}).then(function (account) {
+        return res.send({
+            username: account.username
         });
     })
     .catch(MongoError.ValidationError, validationErrorHandler(res))
