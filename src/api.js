@@ -112,3 +112,20 @@ api.post('/verify', function (req, res) {
     .catch(MongoError.ValidationError, validationErrorHandler(res))
     .catch(genericErrorHandler(res));
 });
+
+
+/**
+ * HTTP POST /emailtaken
+ * {
+ *      email: String
+ * }
+ */
+api.post('/emailtaken', function (req, res) {
+    Account.findOne({username: req.body.email}).then(function (account) {
+        return res.send({
+            taken: (!!account)
+        });
+    })
+    .catch(MongoError.ValidationError, validationErrorHandler(res))
+    .catch(genericErrorHandler(res));
+});
