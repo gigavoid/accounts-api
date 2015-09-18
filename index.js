@@ -1,16 +1,21 @@
 var express     = require('express'),
     fs          = require('fs'),
-    config      = require('./configLoader.js');
+    mongoose    = require('mongoose'),
+    config      = require('./src/configLoader.js'),
+    api         = require('./src/api.js');
 
-var app = express();
+config.init(function() {
 
+    mongoose.connect(config.get('mongo'));
 
-app.get('/', function (req, res) {
-    res.send('Gigavoid Acconts');
+    var app = express();
+
+    app.use('/', api);
+
+    var server = app.listen(config.get('port'), function() {
+        var addr = server.address();
+
+        console.log('Gigavoid Accounts running on %s:%s', addr.address, addr.port);
+    });
 });
 
-var server = app.listen(config.get('port'), function() {
-    var addr = server.address();
-
-    console.log('Gigavoid Accounts running on %s:%s', addr.address, addr.port);
-});
