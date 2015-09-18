@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/gigavoid/accounts",
   "dependencies": {
-    "express": "^4.13.3"
+    "express": "^4.13.3",
+    "nconf": "^0.7.2"
   }
 }
