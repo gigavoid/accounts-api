@@ -6,7 +6,7 @@ var Promise     = require('bluebird'),
 
 var accountSchema = mongoose.Schema({
     // the username, should be an email address
-    username: { type: String, unique: true },
+    username: { type: String, unique: 'This email is already taken' },
     password: { type: String },
     dateCreated: { type: Date, default: Date.now },
 

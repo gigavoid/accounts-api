@@ -5,6 +5,12 @@ var Promise     = require('bluebird'),
     MongoError  = require('mongoose/lib/error'),
     _           = require('lodash');
 
+function PostError(field, message) {
+    this.field = field;
+    this.message = message;
+}
+PostError.prototype = new Error();
+
 var api = module.exports = new express.Router();
 
 function getDeviceInfo(req) {
@@ -13,6 +19,20 @@ function getDeviceInfo(req) {
         deviceType: 'Web Browser', // no support for anything other than web browsers for now
         deviceName: agent.family,
         ipAddress: req.ip
+    }
+}
+
+function postErrorHandler(res) {
+    return function (err) {
+        var errors = {};
+        errors[err.field] = {
+            message: err.message
+        };
+
+        res.status(400).send({
+            error: 'Invalid form data',
+            errors: errors
+        });
     }
 }
 
@@ -51,8 +71,14 @@ function validationErrorHandler(res) {
  * }
  */
 api.post('/register', function (req, res) {
-    // step1: Create a new account object
-    Account.register(req.body.username, req.body.password).then(function (account) {
+    Promise.try(function() {
+        if (!req.body.username) throw new PostError('username', 'No username specified');
+        if (!req.body.password) throw new PostError('password', 'No password specified');
+
+    }).then(function() {
+        // step1: Create a new account object
+        return Account.register(req.body.username, req.body.password)
+    }).then(function (account) {
         // step2: Authenticate right away in order to save a roundtrip to the server
         return [account, account.auth(req.body.password, getDeviceInfo(req))];
     }).spread(function (account, auth) {
@@ -65,6 +91,7 @@ api.post('/register', function (req, res) {
         });
     })
     .catch(MongoError.ValidationError, validationErrorHandler(res))
+    .catch(PostError, postErrorHandler(res))
     .catch(genericErrorHandler(res));
 });
 
