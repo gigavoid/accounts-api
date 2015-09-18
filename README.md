@@ -1,2 +1,2 @@
-# accounts-api
-Accounts Backend API
+# accounts
+Gigavoid Account System
