@@ -133,7 +133,8 @@ api.post('/login', function (req, res) {
 api.post('/verify', function (req, res) {
     Account.findOne({'devices.key': req.body.key}).then(function (account) {
         return res.send({
-            username: account.username
+            username: account.username,
+            displayName: account.displayName
         });
     })
     .catch(MongoError.ValidationError, validationErrorHandler(res))
@@ -152,6 +153,27 @@ api.post('/emailtaken', function (req, res) {
         return res.send({
             taken: (!!account)
         });
+    })
+    .catch(MongoError.ValidationError, validationErrorHandler(res))
+    .catch(genericErrorHandler(res));
+});
+
+
+/**
+ * HTTP POST /setDisplayName
+ * {
+ *      key: String,
+ *      displayName: String
+ * }
+ */
+api.post('/setDisplayName', function (req, res) {
+    Account.findOne({'devices.key': req.body.key}).then(function (account) {
+        account.displayName = req.body.displayName;
+        return account.trySave();
+    }).then(function() {
+        res.send({
+            message: 'Display name changed'
+        })
     })
     .catch(MongoError.ValidationError, validationErrorHandler(res))
     .catch(genericErrorHandler(res));

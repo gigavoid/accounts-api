@@ -9,6 +9,7 @@ var accountSchema = mongoose.Schema({
     username: { type: String, unique: 'This email is already taken' },
     password: { type: String },
     dateCreated: { type: Date, default: Date.now },
+    displayName: { type: String, unique: true }, 
 
     // every time a user signs in it's treated as a 'device',
     // making it possible to sign out a user from a single device.
