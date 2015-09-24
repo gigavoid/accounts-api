@@ -6,7 +6,7 @@ var express     = require('express'),
     api         = require('./src/api.js');
 
 function allowCors(req, res, next) {
-    if (req.headers.origin !== 'http://localhost:8000' && req.headers.origin !== 'http://accounts.gigavoid.com' && !== 'http://sway.gigavoid.com')
+    if (req.headers.origin !== 'http://localhost:8000' && req.headers.origin !== 'http://accounts.gigavoid.com' && req.headers.origin !== 'http://sway.gigavoid.com')
         return next();
 
     res.header('Access-Control-Allow-Origin', '*');
