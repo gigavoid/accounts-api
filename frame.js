@@ -4,7 +4,7 @@
  */
 
 window.addEventListener('message', function(e) {
-    if (e.origin !== 'http://localhost:8000' && e.origin !== 'http://accounts.gigavoid.com')
+    if (e.origin !== 'http://localhost:8000' && e.origin !== 'http://accounts.gigavoid.com' && e.origin !== 'http://sway.gigavoid.com')
         return console.error('Invalid origin', e.origin);
 
     var data = e.data;
