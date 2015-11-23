@@ -4,6 +4,8 @@ var Promise     = require('bluebird'),
     MongoError  = require('mongoose/lib/error'),
     bcrypt      = Promise.promisifyAll(require('bcrypt'));
 
+mongoose.Promise = Promise;
+
 var accountSchema = mongoose.Schema({
     // the username, should be an email address
     username: { type: String, unique: 'This email is already taken' },
